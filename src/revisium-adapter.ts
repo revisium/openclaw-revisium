@@ -80,8 +80,10 @@ export class RevisiumAdapter {
       await project.get();
       this.initialized = true;
       return;
-    } catch {
-      // project doesn't exist — create it
+    } catch (error: unknown) {
+      if (!isNotFoundError(error)) {
+        throw error;
+      }
     }
 
     await org.createProject({
@@ -172,4 +174,12 @@ export class RevisiumAdapter {
     this.headScope = null;
     this.branchScope = null;
   }
+}
+
+function isNotFoundError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+  const msg = error.message.toLowerCase();
+  return msg.includes('not found') || msg.includes('does not exist');
 }

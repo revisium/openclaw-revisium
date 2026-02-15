@@ -364,5 +364,19 @@ describe('RevisiumAdapter', () => {
       expect(mockCreateProject).toHaveBeenCalled();
       expect(mockDraftRevisionScope.commit).toHaveBeenCalled();
     });
+
+    it('should rethrow non-404 errors from project.get()', async () => {
+      mockProjectGet.mockRejectedValue(new Error('Unauthorized'));
+
+      const adapter = new RevisiumAdapter({
+        url: 'http://localhost:9000',
+        organizationId: 'test-org',
+        projectName: 'test-project',
+        template: 'agent-memory',
+      });
+
+      await expect(adapter.ensureProject()).rejects.toThrow('Unauthorized');
+      expect(mockCreateProject).not.toHaveBeenCalled();
+    });
   });
 });
