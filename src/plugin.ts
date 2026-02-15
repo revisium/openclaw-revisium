@@ -14,6 +14,7 @@ export interface RevisiumMemoryConfig {
   projectName: string;
   branchName?: string;
   autoCommit?: boolean;
+  template?: string;
 }
 
 export interface ToolResult {

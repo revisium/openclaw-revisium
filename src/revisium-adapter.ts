@@ -6,6 +6,7 @@ import type {
   RevisionsConnection,
 } from '@revisium/client';
 import type { RevisiumMemoryConfig } from './plugin.js';
+import { getTemplate } from './templates/index.js';
 
 export class RevisiumAdapter {
   private readonly client: RevisiumClient;
@@ -14,6 +15,8 @@ export class RevisiumAdapter {
   private draftScope: RevisionScope | null = null;
   private headScope: RevisionScope | null = null;
   private connected = false;
+  private initialized = false;
+  private initPromise: Promise<void> | null = null;
 
   constructor(config: RevisiumMemoryConfig) {
     this.config = config;
@@ -40,8 +43,68 @@ export class RevisiumAdapter {
     this.connected = true;
   }
 
+  public async ensureProject(): Promise<void> {
+    if (this.initialized) {
+      return;
+    }
+    if (this.initPromise) {
+      return this.initPromise;
+    }
+    this.initPromise = this.doEnsureProject();
+    try {
+      await this.initPromise;
+    } finally {
+      this.initPromise = null;
+    }
+  }
+
+  private async doEnsureProject(): Promise<void> {
+    this.ensureConnected();
+
+    const templateName = this.config.template;
+    if (!templateName) {
+      this.initialized = true;
+      return;
+    }
+
+    const template = getTemplate(templateName);
+    if (!template) {
+      this.initialized = true;
+      return;
+    }
+
+    const org = this.client.org(this.config.organizationId);
+    const project = org.project(this.config.projectName);
+
+    try {
+      await project.get();
+      this.initialized = true;
+      return;
+    } catch {
+      // project doesn't exist — create it
+    }
+
+    await org.createProject({
+      projectName: this.config.projectName,
+      branchName: this.config.branchName ?? 'master',
+    });
+
+    const draft = await this.client.revision({
+      org: this.config.organizationId,
+      project: this.config.projectName,
+    });
+
+    for (const [tableId, schema] of Object.entries(template.tables)) {
+      await draft.createTable(tableId, schema);
+    }
+
+    await draft.commit(`Initialize from template: ${template.name}`);
+    this.initialized = true;
+  }
+
   private async getBranchScope(): Promise<BranchScope> {
     this.ensureConnected();
+    await this.ensureProject();
     this.branchScope ??= await this.client.branch({
       org: this.config.organizationId,
       project: this.config.projectName,
