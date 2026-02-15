@@ -1,0 +1,87 @@
+{
+  "name": "contacts",
+  "description": "Personal CRM with contacts and interaction history",
+  "version": "1.0.0",
+  "tables": {
+    "contacts": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": "",
+          "description": "Contact's full name"
+        },
+        "email": {
+          "type": "string",
+          "default": "",
+          "description": "Email address"
+        },
+        "phone": {
+          "type": "string",
+          "default": "",
+          "description": "Phone number"
+        },
+        "company": {
+          "type": "string",
+          "default": "",
+          "description": "Company or organization"
+        },
+        "role": {
+          "type": "string",
+          "default": "",
+          "description": "Job title or role"
+        },
+        "notes": {
+          "type": "string",
+          "default": "",
+          "description": "Free-form notes about this contact"
+        },
+        "tags": {
+          "type": "string",
+          "default": "",
+          "description": "Comma-separated tags for categorization"
+        },
+        "lastContact": {
+          "type": "string",
+          "default": "",
+          "description": "ISO 8601 datetime of last interaction"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["name", "email", "phone", "company", "role", "notes", "tags", "lastContact"]
+    },
+    "interactions": {
+      "type": "object",
+      "properties": {
+        "contactId": {
+          "type": "string",
+          "default": "",
+          "description": "Row ID of the contact",
+          "foreignKey": "contacts"
+        },
+        "date": {
+          "type": "string",
+          "default": "",
+          "description": "ISO 8601 date of the interaction"
+        },
+        "type": {
+          "type": "string",
+          "default": "",
+          "description": "Interaction type: call, email, meeting, or other"
+        },
+        "summary": {
+          "type": "string",
+          "default": "",
+          "description": "Summary of the interaction"
+        },
+        "followUp": {
+          "type": "string",
+          "default": "",
+          "description": "Follow-up action or next steps"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["contactId", "date", "type", "summary", "followUp"]
+    }
+  }
+}

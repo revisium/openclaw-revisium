@@ -1,0 +1,94 @@
+{
+  "name": "agent-memory",
+  "description": "Core agent memory with facts, episodes, and configuration",
+  "version": "1.0.0",
+  "tables": {
+    "facts": {
+      "type": "object",
+      "properties": {
+        "topic": {
+          "type": "string",
+          "default": "",
+          "description": "Knowledge domain or subject"
+        },
+        "content": {
+          "type": "string",
+          "default": "",
+          "description": "The actual fact or knowledge",
+          "contentMediaType": "text/markdown"
+        },
+        "confidence": {
+          "type": "number",
+          "default": 0,
+          "description": "How reliable this fact is (0.0 to 1.0)"
+        },
+        "source": {
+          "type": "string",
+          "default": "",
+          "description": "Where this knowledge came from"
+        },
+        "category": {
+          "type": "string",
+          "default": "",
+          "description": "Classification: technical, preference, decision, pattern, entity"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["topic", "content", "confidence", "source", "category"]
+    },
+    "episodes": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "default": "",
+          "description": "What the agent did"
+        },
+        "outcome": {
+          "type": "string",
+          "default": "",
+          "description": "Result or output of the action"
+        },
+        "timestamp": {
+          "type": "string",
+          "default": "",
+          "description": "ISO 8601 datetime of the event"
+        },
+        "context": {
+          "type": "string",
+          "default": "",
+          "description": "Why the agent took this action"
+        },
+        "importance": {
+          "type": "number",
+          "default": 0,
+          "description": "How important this episode is (0.0 to 1.0)"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["action", "outcome", "timestamp", "context", "importance"]
+    },
+    "config": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "default": "",
+          "description": "Configuration key name"
+        },
+        "value": {
+          "type": "string",
+          "default": "",
+          "description": "Configuration value"
+        },
+        "description": {
+          "type": "string",
+          "default": "",
+          "description": "What this configuration controls"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["key", "value", "description"]
+    }
+  }
+}
