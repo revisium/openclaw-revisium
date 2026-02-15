@@ -37,24 +37,44 @@ const mockCreateBranch = jest.fn<() => Promise<unknown>>().mockResolvedValue({
   id: 'b-new',
 });
 
+const mockProjectGet = jest.fn<() => Promise<unknown>>().mockResolvedValue({
+  id: 'p-1',
+  name: 'test-project',
+});
+
 const mockProject = jest.fn().mockReturnValue({
   getBranches: mockGetBranches,
   createBranch: mockCreateBranch,
+  get: mockProjectGet,
 });
+
+const mockCreateProject = jest
+  .fn<() => Promise<unknown>>()
+  .mockResolvedValue({ id: 'p-new', name: 'test-project' });
 
 const mockOrg = jest.fn().mockReturnValue({
   project: mockProject,
+  createProject: mockCreateProject,
 });
+
+const mockDraftRevisionScope = {
+  createTable: jest.fn<() => Promise<unknown>>().mockResolvedValue({}),
+  commit: jest.fn<() => Promise<unknown>>().mockResolvedValue({ id: 'rev-1' }),
+};
 
 const mockBranch = jest
   .fn<() => Promise<unknown>>()
   .mockResolvedValue(mockBranchScope);
+const mockRevision = jest
+  .fn<() => Promise<unknown>>()
+  .mockResolvedValue(mockDraftRevisionScope);
 const mockLoginWithToken = jest.fn();
 
 jest.unstable_mockModule('@revisium/client', () => ({
   RevisiumClient: jest.fn().mockImplementation(() => ({
     loginWithToken: mockLoginWithToken,
     branch: mockBranch,
+    revision: mockRevision,
     org: mockOrg,
     client: {},
   })),
@@ -70,6 +90,7 @@ describe('RevisiumAdapter', () => {
     mockBranchScope.draft.mockReturnValue(mockDraftScope);
     mockBranchScope.head.mockReturnValue(mockHeadScope);
     mockBranch.mockResolvedValue(mockBranchScope);
+    mockProjectGet.mockResolvedValue({ id: 'p-1', name: 'test-project' });
   });
 
   it('should create adapter with config', () => {
@@ -240,5 +261,122 @@ describe('RevisiumAdapter', () => {
 
     expect(name).toBe('new-branch');
     expect(mockCreateBranch).toHaveBeenCalledWith('feature', 'head-rev-1');
+  });
+
+  describe('ensureProject', () => {
+    it('should skip init when no template configured', async () => {
+      const adapter = new RevisiumAdapter({
+        url: 'http://localhost:9000',
+        organizationId: 'test-org',
+        projectName: 'test-project',
+      });
+
+      await adapter.ensureProject();
+
+      expect(mockProjectGet).not.toHaveBeenCalled();
+      expect(mockCreateProject).not.toHaveBeenCalled();
+    });
+
+    it('should skip init when project already exists', async () => {
+      mockProjectGet.mockResolvedValue({ id: 'p-1', name: 'test-project' });
+
+      const adapter = new RevisiumAdapter({
+        url: 'http://localhost:9000',
+        organizationId: 'test-org',
+        projectName: 'test-project',
+        template: 'agent-memory',
+      });
+
+      await adapter.ensureProject();
+
+      expect(mockProjectGet).toHaveBeenCalled();
+      expect(mockCreateProject).not.toHaveBeenCalled();
+    });
+
+    it('should create project and tables when project does not exist', async () => {
+      mockProjectGet.mockRejectedValue(new Error('Not found'));
+
+      const adapter = new RevisiumAdapter({
+        url: 'http://localhost:9000',
+        organizationId: 'test-org',
+        projectName: 'test-project',
+        template: 'agent-memory',
+      });
+
+      await adapter.ensureProject();
+
+      expect(mockCreateProject).toHaveBeenCalledWith({
+        projectName: 'test-project',
+        branchName: 'master',
+      });
+      expect(mockRevision).toHaveBeenCalledWith({
+        org: 'test-org',
+        project: 'test-project',
+      });
+      expect(mockDraftRevisionScope.createTable).toHaveBeenCalledTimes(3);
+      expect(mockDraftRevisionScope.commit).toHaveBeenCalledWith(
+        'Initialize from template: agent-memory',
+      );
+    });
+
+    it('should run init only once', async () => {
+      mockProjectGet.mockResolvedValue({ id: 'p-1', name: 'test-project' });
+
+      const adapter = new RevisiumAdapter({
+        url: 'http://localhost:9000',
+        organizationId: 'test-org',
+        projectName: 'test-project',
+        template: 'agent-memory',
+      });
+
+      await adapter.ensureProject();
+      await adapter.ensureProject();
+
+      expect(mockProjectGet).toHaveBeenCalledTimes(1);
+    });
+
+    it('should skip init for unknown template', async () => {
+      const adapter = new RevisiumAdapter({
+        url: 'http://localhost:9000',
+        organizationId: 'test-org',
+        projectName: 'test-project',
+        template: 'nonexistent',
+      });
+
+      await adapter.ensureProject();
+
+      expect(mockProjectGet).not.toHaveBeenCalled();
+      expect(mockCreateProject).not.toHaveBeenCalled();
+    });
+
+    it('should auto-init on first getDraft call', async () => {
+      mockProjectGet.mockRejectedValue(new Error('Not found'));
+
+      const adapter = new RevisiumAdapter({
+        url: 'http://localhost:9000',
+        organizationId: 'test-org',
+        projectName: 'test-project',
+        template: 'agent-memory',
+      });
+
+      await adapter.getDraft();
+
+      expect(mockCreateProject).toHaveBeenCalled();
+      expect(mockDraftRevisionScope.commit).toHaveBeenCalled();
+    });
+
+    it('should rethrow non-404 errors from project.get()', async () => {
+      mockProjectGet.mockRejectedValue(new Error('Unauthorized'));
+
+      const adapter = new RevisiumAdapter({
+        url: 'http://localhost:9000',
+        organizationId: 'test-org',
+        projectName: 'test-project',
+        template: 'agent-memory',
+      });
+
+      await expect(adapter.ensureProject()).rejects.toThrow('Unauthorized');
+      expect(mockCreateProject).not.toHaveBeenCalled();
+    });
   });
 });
