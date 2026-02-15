@@ -1,0 +1,89 @@
+{
+  "name": "openclaw-revisium",
+  "version": "0.1.0",
+  "description": "OpenClaw memory plugin backed by Revisium — structured, versioned agent memory",
+  "keywords": [
+    "openclaw",
+    "revisium",
+    "memory",
+    "agent",
+    "plugin",
+    "versioned",
+    "structured"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/revisium/openclaw-revisium.git"
+  },
+  "license": "MIT",
+  "author": "Anton Kashirov",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown && npm run build:dts",
+    "build:dts": "tsc -p tsconfig.build.json",
+    "dev": "tsdown --watch",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --testPathIgnorePatterns='integration'",
+    "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern='integration' --runInBand",
+    "test:integration:cov": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern='integration' --runInBand --coverage --coverageDirectory=coverage-integration --silent",
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
+    "test:cov": "NODE_OPTIONS=--experimental-vm-modules jest --coverage --silent --testPathIgnorePatterns='integration'",
+    "test:integration:up": "npx @revisium/standalone --auth --port 9000 --data .revisium-test > revisium.log 2>&1 & echo $! > .revisium-test.pid",
+    "test:integration:down": "if [ -f .revisium-test.pid ]; then kill $(cat .revisium-test.pid) 2>/dev/null; rm -f .revisium-test.pid; fi; rm -rf .revisium-test",
+    "lint:ci": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\"",
+    "tsc": "tsc --noEmit",
+    "prepublishOnly": "npm run build && npm run tsc"
+  },
+  "dependencies": {
+    "@revisium/client": "^0.4.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "@jest/globals": "^29.7.0",
+    "@revisium/standalone": "^2.6.1",
+    "@sinclair/typebox": "^0.34.14",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^24.10.7",
+    "eslint": "^9.15.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-sonarjs": "^3.0.5",
+    "globals": "^15.12.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.4.2",
+    "ts-jest": "^29.2.5",
+    "tsdown": "^0.20.1",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.15.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "overrides": {
+    "hono": "4.11.9",
+    "lodash": "4.17.23"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
