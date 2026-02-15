@@ -42,13 +42,11 @@ export class RevisiumAdapter {
 
   private async getBranchScope(): Promise<BranchScope> {
     this.ensureConnected();
-    if (!this.branchScope) {
-      this.branchScope = await this.client.branch({
-        org: this.config.organizationId,
-        project: this.config.projectName,
-        branch: this.config.branchName ?? 'master',
-      });
-    }
+    this.branchScope ??= await this.client.branch({
+      org: this.config.organizationId,
+      project: this.config.projectName,
+      branch: this.config.branchName ?? 'master',
+    });
     return this.branchScope;
   }
 
