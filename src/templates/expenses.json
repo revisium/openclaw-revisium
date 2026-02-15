@@ -1,0 +1,71 @@
+{
+  "name": "expenses",
+  "description": "Expense tracking with budgets per category",
+  "version": "1.0.0",
+  "tables": {
+    "expenses": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "default": "",
+          "description": "ISO 8601 date of the expense"
+        },
+        "amount": {
+          "type": "number",
+          "default": 0,
+          "description": "Expense amount"
+        },
+        "currency": {
+          "type": "string",
+          "default": "USD",
+          "description": "Currency code (e.g. USD, EUR, GBP)"
+        },
+        "category": {
+          "type": "string",
+          "default": "",
+          "description": "Expense category (e.g. food, transport, utilities)"
+        },
+        "description": {
+          "type": "string",
+          "default": "",
+          "description": "What the expense was for"
+        },
+        "vendor": {
+          "type": "string",
+          "default": "",
+          "description": "Vendor or merchant name"
+        },
+        "receipt": {
+          "type": "string",
+          "default": "",
+          "description": "Receipt reference or URL"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["date", "amount", "currency", "category", "description", "vendor", "receipt"]
+    },
+    "budgets": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "default": "",
+          "description": "Budget category matching expense categories"
+        },
+        "monthlyLimit": {
+          "type": "number",
+          "default": 0,
+          "description": "Monthly budget limit"
+        },
+        "notes": {
+          "type": "string",
+          "default": "",
+          "description": "Notes about this budget"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["category", "monthlyLimit", "notes"]
+    }
+  }
+}
