@@ -2,10 +2,9 @@
 
 # openclaw-revisium
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=revisium_openclaw-revisium&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=revisium_openclaw-revisium)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=revisium_openclaw-revisium&metric=coverage)](https://sonarcloud.io/summary/new_code?id=revisium_openclaw-revisium)
-[![GitHub License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/revisium/openclaw-revisium/blob/master/LICENSE)
-[![GitHub Release](https://img.shields.io/github/v/release/revisium/openclaw-revisium)](https://github.com/revisium/openclaw-revisium/releases)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=revisium_openclaw-revisium&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=revisium_openclaw-revisium) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=revisium_openclaw-revisium&metric=coverage)](https://sonarcloud.io/summary/new_code?id=revisium_openclaw-revisium) [![GitHub License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/revisium/openclaw-revisium/blob/master/LICENSE) [![GitHub Release](https://img.shields.io/github/v/release/revisium/openclaw-revisium)](https://github.com/revisium/openclaw-revisium/releases)
+
+**Status: In Development**
 
 [OpenClaw](https://github.com/openclaw/openclaw) memory plugin backed by [Revisium](https://revisium.io) — structured, versioned agent memory.
 
